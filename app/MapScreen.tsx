@@ -103,9 +103,6 @@
 
 // export default MapScreen;
 
-
-
-
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
@@ -121,16 +118,17 @@ interface Washroom {
 
 interface MapScreenProps {
   location: Location.LocationObject | null;
-  submitForm: (id: number) => void; // Define the type of submitForm function here
+  submitForm: (id: number) => void;
+  goToReviews: (id: number) => void; // Define the type of goToReviews function here
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ location, submitForm }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ location, submitForm, goToReviews }) => {
   const [washrooms, setWashrooms] = useState<Washroom[]>([]);
 
   useEffect(() => {
     const fetchWashrooms = async () => {
       try {
-        const response = await axios.get('http://172.20.10.3:8000/test.php/coordinates');
+        const response = await axios.get('http://172.20.10.2:8000/test.php/coordinates');
         console.log('API response data:', response.data);
         setWashrooms(response.data);
       } catch (error) {
@@ -172,6 +170,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ location, submitForm }) => {
                   <Text>{washroom.washroomName}</Text>
                   <TouchableOpacity style={styles.button} onPress={() => submitForm(washroom.washroomId)}>
                     <Text style={styles.buttonText}>Tap In / Rate Washroom</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.button} onPress={() => goToReviews(washroom.washroomId)}>
+                    <Text style={styles.buttonText}>Reviews</Text>
                   </TouchableOpacity>
                 </Callout>
               </Marker>
