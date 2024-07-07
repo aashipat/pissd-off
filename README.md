@@ -24,13 +24,6 @@ To create a sample database, please ensure that **MySQL** is installed before co
   - Starts and stops a timer to track wait times.
   - Sends rating data to the backend.
 
-- **`Review.tsx`**:
-  - Provides an interface for users to write and submit reviews.
-  - Displays a list of reviews for each bathroom.
-
-- **`ReviewItem.tsx`**:
-  - Component used by `Review.tsx` to display individual reviews.
-
 #### Backend File (inside `pissd-off`)
 - **`test.php`**:
   - Backend script that handles requests for bathroom coordinates and ratings.
