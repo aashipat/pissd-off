@@ -38,8 +38,6 @@ if ($_SERVER['REQUEST_URI'] === '/test.php/coordinates') {
 else if($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['REQUEST_URI'] === '/test.php/ratings') {
        // Read and decode JSON body sent by Axios
    $data = json_decode(file_get_contents("php://input"), true);
-
-
    // Assuming $data now holds the JSON-decoded body
    if ($data) {
        // Extract data from the received JSON
