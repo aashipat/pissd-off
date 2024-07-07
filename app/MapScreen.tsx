@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { View, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import MapView, { Marker, Callout} from 'react-native-maps';
 import axios from 'axios';
 import * as Location from 'expo-location';
 
 interface Washroom {
+  washroomId: number;
   washroomName: string;
   latitude: string;
   longitude: string;
 }
 
 interface MapScreenProps {
-  timerSeconds: number;
   location: Location.LocationObject | null;
+  submitForm: (id: number) => void; // Define the type of submitForm function here
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({timerSeconds, location}) => {
+const MapScreen: React.FC<MapScreenProps> = ({location, submitForm}) => {
   const [washrooms, setWashrooms] = useState<Washroom[]>([]);
   useEffect(() => {
     const fetchWashrooms = async () => {
@@ -48,7 +49,7 @@ const MapScreen: React.FC<MapScreenProps> = ({timerSeconds, location}) => {
             const longitude = parseFloat(washroom.longitude);
 
             if (isNaN(latitude) || isNaN(longitude)) {
-              console.warn(`Invalid coordinates for washroom ${washroom.washroomName}: ${washroom.latitude}, ${washroom.longitude}`);
+              console.warn(`Invalid coordinates for washroom ${washroom.washroomId}: ${washroom.latitude}, ${washroom.longitude}`);
               return null;
             }
 
@@ -57,7 +58,16 @@ const MapScreen: React.FC<MapScreenProps> = ({timerSeconds, location}) => {
                 key={index}
                 coordinate={{ latitude, longitude }}
                 title={washroom.washroomName}
-              />
+              >
+
+              <Callout>
+                <Text>{washroom.washroomName}</Text>
+                <TouchableOpacity style={styles.button} onPress={() => submitForm(washroom.washroomId)}>
+                <Text style={styles.buttonText}>Tap In / Rate Washroom</Text>
+                </TouchableOpacity>
+              </Callout>
+
+              </Marker>
             );
           })}
         </MapView>
@@ -74,6 +84,20 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+
+
+  button: {
+    backgroundColor: 'lightblue',
+    marginTop: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    textAlign: 'center',
   },
 });
 

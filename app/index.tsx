@@ -6,11 +6,16 @@ import * as Location from 'expo-location';
 import DetailsScreen from './DetailsScreen';
 
 const App = () => {
-  // const [currentScreen, setCurrentScreen] = useState<'Map' | 'Details'>('Details');
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [timerSeconds, setTimerSeconds] = useState(0);
-  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [currentScreen, setCurrentScreen] = useState<'Map' | 'Form'>('Map');
+
+  const [washroomId, setWashroomId] = useState<number>(-1);
+
+  const goToFormPage = (id: number) => {
+    console.log('Button pressed in child component with data:', id);
+    setWashroomId(id);
+    setCurrentScreen('Form')
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,7 +25,6 @@ const App = () => {
           console.warn('Permission to access location was denied');
           return;
         }
-
         let location = await Location.getCurrentPositionAsync({});
         setLocation(location);
       } catch (error) {
@@ -32,28 +36,19 @@ const App = () => {
   }, []);
 
 
-  // const handleTapIn = () => {
-  //   if (!timerRunning) {
-  //     setTimerRunning(true);
-  //     let seconds = 0;
-  //     const interval = setInterval(() => {
-  //       seconds++;
-  //       setTimerSeconds(seconds);
-  //     }, 1000);
-  //     setTimerInterval(interval);
-  //   }
-  // };
-
-  // const handleTapOut = () => {
-  //   if (timerRunning && timerInterval) {
-  //     clearInterval(timerInterval);
-  //     setTimerRunning(false);
-  //     setTimerSeconds(0); // Reset timer seconds
-  //   }
+  // const renderScreen = () => {
+  //   return <MapScreen location={location} submitForm={goToFormPage}/>;
   // };
 
   const renderScreen = () => {
-    return <MapScreen timerSeconds={timerSeconds} location={location}/>;
+    switch (currentScreen) {
+      case 'Map':
+        return <MapScreen location={location} submitForm={goToFormPage} />;
+      case 'Form':
+        // return <DetailsScreen/>;
+      default:
+        return null;
+    }
   };
 
   return (

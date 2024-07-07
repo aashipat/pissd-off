@@ -16,7 +16,7 @@ if ($conn->connect_error) {
 // Check if the request is for /coordinates endpoint
 if ($_SERVER['REQUEST_URI'] === '/test.php/coordinates') {
     // Fetch data from MySQL database
-    $sql = "SELECT w.washroomName, w.latitude, w.longitude
+    $sql = "SELECT w.washroomId, w.washroomName, w.latitude, w.longitude
             FROM Washrooms w
             ";
     $result = $conn->query($sql);
