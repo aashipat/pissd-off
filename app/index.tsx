@@ -16,10 +16,9 @@ const App = () => {
     setCurrentScreen('Form');
   };
 
-  const goToReviewsPage = (id: number) => {
-    console.log('Button pressed in child component to view reviews for washroom:', id);
-    setWashroomId(id);
-    setCurrentScreen('Review');
+  const goToMapsPage = () => {
+    console.log('Button pressed in child component with data:');
+    setCurrentScreen('Map');
   };
 
   useEffect(() => {
@@ -43,9 +42,9 @@ const App = () => {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'Map':
-        return <MapScreen location={location} submitForm={goToFormPage} goToReviews={goToReviewsPage} />;
+        return <MapScreen location={location} goToFormPage={goToFormPage}/>;
       case 'Form':
-        return <Form />;
+        return <Form washroomId={washroomId} submitForm={goToMapsPage}/>;
       case 'Review':
         return <Review />;
       default:
