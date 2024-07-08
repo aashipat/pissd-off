@@ -1,13 +1,13 @@
 CREATE TABLE Washrooms (
 	washroomId INT NOT NULL PRIMARY KEY,
-	washroomName VARCHAR(100),
-	category VARCHAR(100),
+	washroomName VARCHAR(100) NOT NULL,
+	category VARCHAR(100) NOT NULL,
 	street VARCHAR(100),
-	openHour INT,
-	closeHour INT,
+	openHour DECIMAL(4,2),
+	closeHour DECIMAL(4,2),
 	onCall BOOLEAN,
-	latitude VARCHAR(100),
-	longitude VARCHAR(100),
+	latitude VARCHAR(100) NOT NULL,
+	longitude VARCHAR(100) NOT NULL,
 	score INT,
 	CHECK(0 <= score AND score <= 5)
 );
