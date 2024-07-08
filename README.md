@@ -41,11 +41,19 @@ mysql> CREATE DATABASE pissd;
 mysql> USE pissd;
 ```
 
-2. Create Tables and populate with sample Washroom data
+2. Create Tables and populate with
+
+  * sample data
 
 ```mysql
 mysql> source /sql-files/CreateTables.sql
-mysql> source /sql-files/PopulateWashroomData.sql
+mysql> source /sql-files/SamplePopulateData.sql
+```
+  * production data
+    
+```mysql
+mysql> source /sql-files/CreateTables.sql
+mysql> source /sql-files/ProductionPopulateData.sql
 ```
 
 ## Running application

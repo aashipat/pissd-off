@@ -1,36 +1,31 @@
 CREATE TABLE Washrooms (
- 	washroomId INT NOT NULL PRIMARY KEY,
+	washroomId INT NOT NULL PRIMARY KEY,
 	washroomName VARCHAR(100),
 	category VARCHAR(100),
 	street VARCHAR(100),
-	hoursOfOperation VARCHAR(100),
-	onCall BOOL,
+	openHour INT,
+	closeHour INT,
+	onCall BOOLEAN,
 	latitude VARCHAR(100),
-	longitude VARCHAR(100)
+	longitude VARCHAR(100),
+	score INT,
+	CHECK(0 <= score AND score <= 5)
 );
 
 CREATE TABLE Reviews (
+	washroomId INT NOT NULL REFERENCES Washrooms(washroomId),
 	reviewId INT NOT NULL PRIMARY KEY,
 	reviewTimestamp DATETIME NOT NULL,
-	text VARCHAR(30)
-);
-
-CREATE TABLE isReviewOf(
-	washroomId INT NOT NULL REFERENCES Washroom(washroomId),
-	reviewId INT NOT NULL REFERENCES Reviews(reviewId),
-	PRIMARY KEY(washroomId, reviewId) 
+	text VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE Forms (
+	washroomId INT NOT NULL REFERENCES Washrooms(washroomId),
 	formId INT NOT NULL PRIMARY KEY,
 	formTimestamp DATETIME NOT NULL,
 	gender VARCHAR(6) NOT NULL,
-	waitTime DECIMAL(3,2),
-	cleanliness INT
-);
-
-CREATE TABLE isFormOf (
-	washroomId INT NOT NULL REFERENCES Washrooms(washroomId),
-	formId INT NOT NULL REFERENCES UserForms(formId),
-	PRIMARY KEY (washroomId, formId)
+	waitTime DECIMAL(5,2) NOT NULL,
+	cleanliness INT,
+	CHECK(0 <= cleanliness AND cleanliness <= 5),
+	CHECK(gender = 'Female' OR gender = 'Male' OR gender = 'Other')
 );
