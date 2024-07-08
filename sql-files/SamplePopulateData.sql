@@ -21,4 +21,4 @@ INSERT INTO Reviews (washroomId, reviewId, reviewTimestamp, text) VALUES
 (1, 5, '2023-04-04 20:35:31.313', 'I had a great s***'),
 (4, 6, '2024-05-02 20:35:31.313', 'very clean'),
 (1, 7, '2024-05-10 20:36:31.313', 'this washroom is really ugly'), 
-(1, 8, '2024-05-10 20:35:00.000', 'the ugliest washroom ever');; 
+(1, 8, '2024-05-10 20:35:00.000', 'the ugliest washroom ever');
