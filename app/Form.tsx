@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, AppState, AppStateStatus } from 'react-native';
 import * as Font from 'expo-font';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
-
-interface FormProps {
-  washroomId: number;
-  submitForm: () => void;
-}
 
 const TIMER_TASK = 'background-timer-task';
 
@@ -27,6 +22,13 @@ TaskManager.defineTask(TIMER_TASK, async () => {
     return BackgroundFetch.BackgroundFetchResult.Failed;
   }
 });
+
+
+interface FormProps {
+  washroomId: number;
+  submitForm: () => void;
+}
+
 
 const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -69,7 +71,7 @@ const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
         if (timerStartTime) {
           const currentTime = new Date().getTime();
           const elapsedTime = Math.floor((currentTime - parseInt(timerStartTime)) / 1000);
-          setTimerSeconds(timerSeconds + elapsedTime);
+          setTimerSeconds(prevSeconds => prevSeconds + elapsedTime);
         }
       }
     };
@@ -79,14 +81,14 @@ const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
     return () => {
       subscription.remove();
     };
-  }, [timerRunning, timerSeconds]);
+  }, [timerRunning]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
 
     if (timerRunning) {
       interval = setInterval(() => {
-        setTimerSeconds((prevSeconds) => prevSeconds + 1);
+        setTimerSeconds(prevSeconds => prevSeconds + 1);
       }, 1000);
       AsyncStorage.setItem('timerRunning', 'true');
     } else if (interval) {
@@ -127,7 +129,7 @@ const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
     // Send to backend
     try {
       const response = await axios.post('http://172.20.10.3:8000/test.php/ratings', {
-        washroomId: washroomId,
+        washroomId,
         reviewTimestamp: new Date(),
         gender: selectedGender,
         cleanliness: bathroomRating,
@@ -149,7 +151,7 @@ const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
     <View style={styles.container}>
       {!showTimerMessage ? (
         <TouchableOpacity
-          style={[styles.startButton, timerRunning && styles.stopButton]} // Conditional style for Start/Stop button
+          style={[styles.startButton, timerRunning && styles.stopButton]}
           onPress={handleToggleTimer}
         >
           <Text style={styles.buttonText}>
@@ -187,34 +189,26 @@ const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
 
       <View style={styles.dropdownContainer}>
         <Text style={styles.label}>Gender</Text>
-        <TouchableOpacity
-          style={[styles.genderButton, selectedGender === 'female' && styles.selectedGenderButton]}
-          onPress={() => handleGenderPress('female')}
-        >
-          <Text style={[styles.buttonText, selectedGender === 'female' && styles.selectedGenderText]}>Female</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.genderButton, selectedGender === 'male' && styles.selectedGenderButton]}
-          onPress={() => handleGenderPress('male')}
-        >
-          <Text style={[styles.buttonText, selectedGender === 'male' && styles.selectedGenderText]}>Male</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.genderButton, selectedGender === 'other' && styles.selectedGenderButton]}
-          onPress={() => handleGenderPress('other')}
-        >
-          <Text style={[styles.buttonText, selectedGender === 'other' && styles.selectedGenderText]}>Other</Text>
-        </TouchableOpacity>
+        {['female', 'male', 'other'].map((gender) => (
+          <TouchableOpacity
+            key={gender}
+            style={[styles.genderButton, selectedGender === gender && styles.selectedGenderButton]}
+            onPress={() => handleGenderPress(gender)}
+          >
+            <Text style={[styles.buttonText, selectedGender === gender && styles.selectedGenderText]}>
+              {gender.charAt(0).toUpperCase() + gender.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {<TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleSubmit}
-          disabled={timerRunning} // Disable submit when timer is running
-        >
-          <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
-      }
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={handleSubmit}
+        disabled={timerRunning} // Disable submit when timer is running
+      >
+        <Text style={styles.buttonText}>Submit</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -224,16 +218,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffe4e1', // Pale pink background
+    backgroundColor: '#ffe4e1',
   },
   startButton: {
-    backgroundColor: '#ffb6c1', // Light pastel color
+    backgroundColor: '#ffb6c1',
     padding: 15,
     borderRadius: 10,
     marginTop: 10,
   },
   stopButton: {
-    backgroundColor: '#ff6347', // Light coral color
+    backgroundColor: '#ff6347',
   },
   timerContainer: {
     marginTop: 20,
@@ -241,7 +235,7 @@ const styles = StyleSheet.create({
   },
   timerText: {
     fontSize: 18,
-    fontFamily: 'Lato-Regular', // Use the loaded font
+    fontFamily: 'Lato-Regular',
   },
   timerMessageContainer: {
     marginTop: 20,
@@ -249,7 +243,7 @@ const styles = StyleSheet.create({
   },
   timerMessage: {
     fontSize: 18,
-    fontFamily: 'Lato-Bold', // Use the loaded font for emphasis
+    fontFamily: 'Lato-Bold',
     textAlign: 'center',
   },
   ratingButtonsContainer: {
@@ -263,16 +257,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   ratingButton: {
-    backgroundColor: '#ffb6c1', // Light pastel color
+    backgroundColor: '#ffb6c1',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
   },
   selectedRating: {
-    backgroundColor: '#ff69b4', // Highlight selected rating
+    backgroundColor: '#ff69b4',
   },
   buttonText: {
-    fontFamily: 'Lato-Regular', // Use the loaded font
+    fontFamily: 'Lato-Regular',
     fontSize: 16,
   },
   dropdownContainer: {
@@ -280,24 +274,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    fontFamily: 'Lato-Bold', // Use the loaded font
+    fontFamily: 'Lato-Bold',
     fontSize: 18,
   },
   genderButton: {
-    backgroundColor: '#ffb6c1', // Light pastel color
+    backgroundColor: '#ffb6c1',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     marginTop: 10,
   },
   selectedGenderButton: {
-    backgroundColor: '#ff69b4', // Highlight selected gender
+    backgroundColor: '#ff69b4',
   },
   selectedGenderText: {
-    fontFamily: 'Lato-Bold', // Use the loaded font for emphasis
+    fontFamily: 'Lato-Bold',
   },
   submitButton: {
-    backgroundColor: '#ffb6c1', // Light pastel color
+    backgroundColor: '#ffb6c1',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
