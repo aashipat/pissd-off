@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity} from 'react-native';
-import MapView, { Marker, Callout} from 'react-native-maps';
+import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
+import MapView, { Marker, Callout } from 'react-native-maps';
 import axios from 'axios';
 import * as Location from 'expo-location';
 
@@ -13,11 +13,12 @@ interface Washroom {
 
 interface MapScreenProps {
   location: Location.LocationObject | null;
-  goToFormPage: (id: number) => void; // Define the type of goToFormPage function here
+  goToFormPage: (id: number) => void;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({location, goToFormPage}) => {
+const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage }) => {
   const [washrooms, setWashrooms] = useState<Washroom[]>([]);
+
   useEffect(() => {
     const fetchWashrooms = async () => {
       try {
@@ -59,14 +60,21 @@ const MapScreen: React.FC<MapScreenProps> = ({location, goToFormPage}) => {
                 coordinate={{ latitude, longitude }}
                 title={washroom.washroomName}
               >
+                {/* Custom marker with image */}
+                <Image
+                  source={require('./toiletPin.png')}
+                  style={{ width: 40, height: 40, resizeMode: 'contain'}}
+                />
 
-              <Callout>
-                <Text>{washroom.washroomName}</Text>
-                <TouchableOpacity style={styles.button} onPress={() => goToFormPage(washroom.washroomId)}>
-                <Text style={styles.buttonText}>Tap In / Rate Washroom</Text>
-                </TouchableOpacity>
-              </Callout>
-
+                {/* Callout with information */}
+                <Callout tooltip>
+                  <View style={styles.calloutContainer}>
+                    <Text style={styles.calloutText}>{washroom.washroomName}</Text>
+                    <TouchableOpacity style={styles.button} onPress={() => goToFormPage(washroom.washroomId)}>
+                      <Text style={styles.buttonText}>Tap In / Rate Washroom</Text>
+                    </TouchableOpacity>
+                  </View>
+                </Callout>
               </Marker>
             );
           })}
@@ -85,8 +93,18 @@ const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-
-
+  calloutContainer: {
+    minWidth: 150,
+    maxWidth: 300,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  calloutText: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
   button: {
     backgroundColor: 'lightblue',
     marginTop: 5,
@@ -96,8 +114,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
-    fontSize: 18,
-    textAlign: 'center',
+    fontSize: 16,
   },
 });
 
