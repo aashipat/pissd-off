@@ -32,7 +32,7 @@ interface FormProps {
 
 const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [selectedGender, setSelectedGender] = useState<string>('other');
+  const [selectedGender, setSelectedGender] = useState<string>('Other');
   const [bathroomRating, setBathroomRating] = useState<number | null>(null);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -189,7 +189,7 @@ const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
 
       <View style={styles.dropdownContainer}>
         <Text style={styles.label}>Gender</Text>
-        {['female', 'male', 'other'].map((gender) => (
+        {['Female', 'Male', 'Other'].map((gender) => (
           <TouchableOpacity
             key={gender}
             style={[styles.genderButton, selectedGender === gender && styles.selectedGenderButton]}

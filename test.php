@@ -14,9 +14,9 @@ if ($conn->connect_error) {
 }
 
 // Check if the request is for /coordinates endpoint
-if ($_SERVER['REQUEST_URI'] === '/test.php/coordinates') {
+if ($_SERVER['REQUEST_URI'] === '/test.php/washroomData') {
     // Fetch data from MySQL database
-    $sql = "SELECT w.washroomId, w.washroomName, w.latitude, w.longitude FROM Washrooms w";
+    $sql = "SELECT w.washroomId, w.washroomName, w.category, w.onCall, w.openHour, w.closeHour, w.score, w.latitude, w.longitude FROM Washrooms w";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
@@ -62,16 +62,9 @@ if ($_SERVER['REQUEST_URI'] === '/test.php/coordinates') {
             $intFormId = $row['nextFormId'];
 
             // Prepare SQL statement for inserting into Forms table
-            $insertForms = "INSERT INTO Forms (formId, waitTime, cleanliness, gender, formTimestamp) VALUES ($intFormId, $waitTime, " . ($cleanliness !== null ? $cleanliness : "NULL") . ", '{$gender}', '{$date}')";
+            $insertForms = "INSERT INTO Forms (washroomId, formId, waitTime, cleanliness, gender, formTimestamp) VALUES ($washroomId, $intFormId, $waitTime, " . ($cleanliness !== null ? $cleanliness : "NULL") . ", '{$gender}', '{$date}')";
             if ($conn->query($insertForms) === TRUE) {
                 echo "New record inserted successfully";
-
-                $insertisFormOf = "INSERT INTO isFormOf (washroomId, formId) VALUES ($washroomId, $intFormId)";
-                if ($conn->query($insertisFormOf) === TRUE) {
-                    echo "New record inserted successfully";
-                } else {
-                    echo "Error: " . $insertisFormOf . "<br>" . $conn->error;
-                }
             } else {
                 echo "Error: " . $insertForms . "<br>" . $conn->error;
             }

@@ -7,8 +7,20 @@ import * as Location from 'expo-location';
 interface Washroom {
   washroomId: number;
   washroomName: string;
+  category: string;
+  onCall: boolean | null;
+  openHour: number | null;
+  closeHour: number | null;
+  score: number | null;
   latitude: string;
   longitude: string;
+}
+
+interface WashroomWaitTimes {
+  wId: number;
+  femaleWait: number | null;
+  maleWait: number | null;
+  otherWait: number | null;
 }
 
 interface MapScreenProps {
@@ -17,12 +29,12 @@ interface MapScreenProps {
 }
 
 const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage }) => {
-  const [washrooms, setWashrooms] = useState<Washroom[]>([]);
+  const [washrooms, setWashrooms] = useState<Washroom[]>([]); //array of washrooms
 
   useEffect(() => {
     const fetchWashrooms = async () => {
       try {
-        const response = await axios.get('http://172.20.10.3:8000/test.php/coordinates');
+        const response = await axios.get('http://172.20.10.3:8000/test.php/washroomData');
         console.log('API response data:', response.data);
         setWashrooms(response.data);
       } catch (error) {
@@ -30,8 +42,31 @@ const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage }) => {
       }
     };
 
+    const fetchWashroomWaitTimes = async () => {
+      try {
+
+      } catch (error) {
+
+      }
+    }
+
     fetchWashrooms();
+    fetchWashroomWaitTimes();
   }, []);
+
+
+
+
+    // Function to determine marker image based on coordinates
+    const getMarkerImage = (category: string): any => {
+      // Example condition: Use different images based on latitude or longitude ranges
+      // Replace with your logic based on specific criteria
+      if (category == "Comfort Station") {
+        return require('./comfort.png'); // Example image 1
+      } else {
+        return require('./portapotty.png'); // Example image 2
+      }
+    };
 
   return (
     <View style={styles.container}>
@@ -62,14 +97,25 @@ const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage }) => {
               >
                 {/* Custom marker with image */}
                 <Image
-                  source={require('./toiletPin.png')}
-                  style={{ width: 40, height: 40, resizeMode: 'contain'}}
+                  source={getMarkerImage(washroom.category)}
+                  style={{ width: 45, height: 45, resizeMode: 'contain'}}
                 />
 
                 {/* Callout with information */}
                 <Callout tooltip>
                   <View style={styles.calloutContainer}>
                     <Text style={styles.calloutText}>{washroom.washroomName}</Text>
+
+                    {washroom.openHour && washroom.closeHour ? (
+                        <Text>Hours: {washroom.openHour} - {washroom.closeHour}</Text>
+                      ) : null
+                    }
+
+                    {washroom.score ? (
+                        <Text>Overall Score: {washroom.score}</Text>
+                      ) : null
+                    }
+
                     <TouchableOpacity style={styles.button} onPress={() => goToFormPage(washroom.washroomId)}>
                       <Text style={styles.buttonText}>Tap In / Rate Washroom</Text>
                     </TouchableOpacity>
