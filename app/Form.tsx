@@ -1,12 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, AppState, AppStateStatus } from 'react-native';
 import * as Font from 'expo-font';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as BackgroundFetch from 'expo-background-fetch';
+import * as TaskManager from 'expo-task-manager';
 
 interface FormProps {
   washroomId: number;
   submitForm: () => void;
 }
+
+const TIMER_TASK = 'background-timer-task';
+
+TaskManager.defineTask(TIMER_TASK, async () => {
+  try {
+    const timerStartTime = await AsyncStorage.getItem('timerStartTime');
+    if (timerStartTime) {
+      const currentTime = new Date().getTime();
+      const elapsedTime = Math.floor((currentTime - parseInt(timerStartTime)) / 1000);
+      await AsyncStorage.setItem('timerSeconds', elapsedTime.toString());
+    }
+    return BackgroundFetch.BackgroundFetchResult.NewData;
+  } catch (error) {
+    console.error(error);
+    return BackgroundFetch.BackgroundFetchResult.Failed;
+  }
+});
 
 const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -24,9 +44,42 @@ const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
       });
       setFontsLoaded(true);
     }
-
     loadFonts();
   }, []);
+
+  useEffect(() => {
+    const checkStoredTimer = async () => {
+      const storedTimerRunning = await AsyncStorage.getItem('timerRunning');
+      const storedTimerSeconds = await AsyncStorage.getItem('timerSeconds');
+      if (storedTimerRunning === 'true' && storedTimerSeconds) {
+        setTimerRunning(true);
+        setTimerSeconds(parseInt(storedTimerSeconds));
+      }
+    };
+    checkStoredTimer();
+  }, []);
+
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'background' && timerRunning) {
+        await AsyncStorage.setItem('timerStartTime', new Date().getTime().toString());
+      }
+      if (nextAppState === 'active') {
+        const timerStartTime = await AsyncStorage.getItem('timerStartTime');
+        if (timerStartTime) {
+          const currentTime = new Date().getTime();
+          const elapsedTime = Math.floor((currentTime - parseInt(timerStartTime)) / 1000);
+          setTimerSeconds(timerSeconds + elapsedTime);
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription.remove();
+    };
+  }, [timerRunning, timerSeconds]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
@@ -35,8 +88,10 @@ const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
       interval = setInterval(() => {
         setTimerSeconds((prevSeconds) => prevSeconds + 1);
       }, 1000);
+      AsyncStorage.setItem('timerRunning', 'true');
     } else if (interval) {
       clearInterval(interval);
+      AsyncStorage.setItem('timerRunning', 'false');
     }
 
     return () => {
@@ -45,6 +100,10 @@ const Form: React.FC<FormProps> = ({ washroomId, submitForm }) => {
       }
     };
   }, [timerRunning]);
+
+  useEffect(() => {
+    AsyncStorage.setItem('timerSeconds', timerSeconds.toString());
+  }, [timerSeconds]);
 
   const handleToggleTimer = () => {
     if (!timerRunning) {
@@ -205,47 +264,44 @@ const styles = StyleSheet.create({
   },
   ratingButton: {
     backgroundColor: '#ffb6c1', // Light pastel color
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
   },
   selectedRating: {
-    backgroundColor: '#ffa07a', // Light salmon color
+    backgroundColor: '#ff69b4', // Highlight selected rating
+  },
+  buttonText: {
+    fontFamily: 'Lato-Regular', // Use the loaded font
+    fontSize: 16,
   },
   dropdownContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginTop: 20,
+    alignItems: 'center',
+  },
+  label: {
+    fontFamily: 'Lato-Bold', // Use the loaded font
+    fontSize: 18,
   },
   genderButton: {
     backgroundColor: '#ffb6c1', // Light pastel color
-    padding: 15,
-    borderRadius: 10,
-    marginHorizontal: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 10,
   },
   selectedGenderButton: {
-    backgroundColor: '#ffa07a', // Light salmon color when selected
+    backgroundColor: '#ff69b4', // Highlight selected gender
   },
   selectedGenderText: {
-    color: 'white', // White text color when selected
-  },
-  label: {
-    fontSize: 18,
-    fontFamily: 'Lato-Regular',
-    marginRight: 10,
+    fontFamily: 'Lato-Bold', // Use the loaded font for emphasis
   },
   submitButton: {
     backgroundColor: '#ffb6c1', // Light pastel color
-    padding: 15,
-    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
     marginTop: 20,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontFamily: 'Lato-Regular', // Use the loaded font
-    textAlign: 'center',
   },
 });
 
