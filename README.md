@@ -6,7 +6,7 @@ This project is a React Native application designed to help users find and rate 
 
 To create a sample database, please ensure that **MySQL** is installed before continuining with the following steps. Installing can be found at the [installation page](https://dev.mysql.com/doc/refman/8.0/en/installing.html).
 
-### Main File Locations and Descriptions
+## Main File Locations and Descriptions
 
 #### Frontend Files (inside `pissd-off/app`)
 - **`index.tsx`**:
@@ -28,6 +28,15 @@ To create a sample database, please ensure that **MySQL** is installed before co
 - **`test.php`**:
   - Backend script that handles requests for bathroom coordinates and ratings.
   - Connects to the SQL database to store and retrieve data.
+
+#### SQL Files (inside `pissd-off/sql-files`)
+- **`CreateScoreTrigger.sql`**:
+  - Creates a SQL trigger called UpdateScoreAfterInsert.
+  - Updates the score of a washroom in the Washrooms table whenever a new rating is inserted into the Forms table.
+    
+- **`CreateScoreView.sql`**:
+  - Creates a view (virtual table) called WashroomScores.
+  - Calculates overall scores for washrooms based on wait time, gender equality, and cleanliness.
 
 ## Database Setup
 
