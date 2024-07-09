@@ -55,14 +55,14 @@ mysql> USE pissd;
   * sample data
 
 ```mysql
-mysql> source /sql-files/MakeEverything.sql
-mysql> source /sql-files/SamplePopulateData.sql
+mysql> source sql-files/MakeEverything.sql
+mysql> source sql-files/SamplePopulateData.sql
 ```
   * production data
     
 ```mysql
-mysql> source /sql-files/MakeEverything.sql
-mysql> source /sql-files/ProductionPopulateData.sql
+mysql> source sql-files/MakeEverything.sql
+mysql> source sql-files/ProductionPopulateData.sql
 ```
 
 ## Running application
