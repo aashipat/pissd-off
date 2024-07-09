@@ -64,8 +64,3 @@ mysql> source /sql-files/ProductionPopulateData.sql
 2. Run `yarn start` 
     - note it will not work when connected to the school wifi
 4. Scan the QR code with the `Expo Go` app on your phone
-
-## Currently supported features 
-
-1. User submits a rating for the bathroom
-2. Get bathroom locations and data for users to view
