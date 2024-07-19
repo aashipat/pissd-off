@@ -31,6 +31,24 @@ if ($_SERVER['REQUEST_URI'] === '/test.php/washroomData') {
     } else {
         echo json_encode(array('message' => '0 results'));
     }
+} else if ($_SERVER['REQUEST_URI'] === '/test.php/openWashrooms') {
+    $date = date('H'); // Convert string to date format.
+    // Fetch data from MySQL database
+    $sql = "SELECT w.washroomId, CASE WHEN w.openHour <= $date AND w.closeHour >= $date THEN 1 WHEN w.openHour IS NULL OR w.closeHour IS NULL THEN 1 ELSE 0 END AS isOpen FROM Washrooms w;";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        // Output data of each row
+        $data = array();
+        while ($row = $result->fetch_assoc()) {
+            $data[] = $row;
+        }
+        // Output JSON format
+        header('Content-Type: application/json');
+        echo json_encode($data);
+    } else {
+        echo json_encode(array('message' => '0 results'));
+    }
 } else if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['REQUEST_URI'] === '/test.php/ratings') {
     // Read and decode JSON body sent by Axios
     $data = json_decode(file_get_contents("php://input"), true);
@@ -122,6 +140,28 @@ if ($_SERVER['REQUEST_URI'] === '/test.php/washroomData') {
         // Handle case where JSON decoding failed
         http_response_code(400);
         echo "Failed to decode JSON.";
+    }
+} else if ($_SERVER['REQUEST_METHOD'] === 'GET' && strpos($_SERVER['REQUEST_URI'], '/reviews') !== false) {
+    // Check if the washroomID parameter is present in the query string
+    if (isset($_GET['washroomID'])) {
+        $washroomID = $_GET['washroomID'];
+        // Fetch data from MySQL database
+        $sql = "SELECT r.text FROM Reviews r WHERE r.washroomId = $washroomId ORDER BY r.reviewTimestamp;";
+        
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) {
+            // Output data of each row
+            $data = array();
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+            // Output JSON format
+            header('Content-Type: application/json');
+            echo json_encode($data);
+        } else {
+            echo json_encode(array('message' => '0 results'));
+        }
     }
 } else {
     // Invalid endpoint
