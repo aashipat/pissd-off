@@ -123,11 +123,11 @@ if ($_SERVER['REQUEST_URI'] === '/test.php/washroomData') {
             $intReviewId = $row['nextReviewId'];
 
             // Prepare SQL statement for inserting into Forms table
-            $insertReviews = "INSERT INTO Reviews (washroomId, reviewId, text, reviewTimestamp) VALUES ($washroomId, $intReviewId, $waitTime, '{$text}', '{$date}')";
-            if ($conn->query($insertForms) === TRUE) {
+            $insertReviews = "INSERT INTO Reviews (washroomId, reviewId, text, reviewTimestamp) VALUES ($washroomId, $intReviewId, '{$text}', '{$date}')";
+            if ($conn->query($insertReviews) === TRUE) {
                 echo "New record inserted successfully";
             } else {
-                echo "Error: " . $insertForms . "<br>" . $conn->error;
+                echo "Error: " . $insertReviews . "<br>" . $conn->error;
             }
         } else {
             echo "Error retrieving next reviewId: " . $conn->error;
@@ -143,11 +143,28 @@ if ($_SERVER['REQUEST_URI'] === '/test.php/washroomData') {
     }
 } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && strpos($_SERVER['REQUEST_URI'], '/reviews') !== false) {
     // Check if the washroomID parameter is present in the query string
-    if (isset($_GET['washroomID'])) {
-        $washroomID = $_GET['washroomID'];
+    if (isset($_GET['washroomId'])) {
+        $washroomId = $_GET['washroomId'];
         // Fetch data from MySQL database
-        $sql = "SELECT r.text FROM Reviews r WHERE r.washroomId = $washroomId ORDER BY r.reviewTimestamp;";
+        $sql = "SELECT r.text FROM Reviews r WHERE r.washroomId = $washroomId";
         
+        $result = $conn->query($sql);
+
+            // Output data of each row
+            $data = array();
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+            // Output JSON format
+            header('Content-Type: application/json');
+            echo json_encode($data);
+    }
+} else if ($_SERVER['REQUEST_METHOD'] === 'GET' && strpos($_SERVER['REQUEST_URI'], '/avgWaitTime') !== false) {
+    // Check if the washroomID parameter is present in the query string
+    if (isset($_GET['washroomId'])) {
+        $washroomId = $_GET['washroomId'];
+        // Fetch data from MySQL database
+        $sql = "WITH avgWaitTimes AS (SELECT f.washroomId, f.gender, AVG(f.waitTime) AS avgWaitTime FROM Forms f GROUP BY f.washroomId, f.gender) SELECT gender, avgWaitTime FROM avgWaitTimes WHERE washroomId = $washroomId";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -159,8 +176,6 @@ if ($_SERVER['REQUEST_URI'] === '/test.php/washroomData') {
             // Output JSON format
             header('Content-Type: application/json');
             echo json_encode($data);
-        } else {
-            echo json_encode(array('message' => '0 results'));
         }
     }
 } else {
