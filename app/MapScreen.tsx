@@ -24,13 +24,14 @@ interface MapScreenProps {
 
 const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage, goToReviewsPage }) => {
   const [washrooms, setWashrooms] = useState<Washroom[]>([]);
-  const [mapType, setMapType] = useState(false); // Change to boolean
+  const [mapType, setMapType] = useState<boolean>(false);
+  const [expandedWashroomId, setExpandedWashroomId] = useState<number | null>(null);
+  const [waitTimes, setWaitTimes] = useState<any>(null);
 
   useEffect(() => {
     const fetchWashrooms = async () => {
       try {
         const response = await axios.get('http://172.20.10.3:8000/test.php/washroomData');
-        console.log('API response data:', response.data);
         setWashrooms(response.data);
       } catch (error) {
         console.error('Error fetching washrooms data: ', error);
@@ -39,6 +40,34 @@ const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage, goToRevie
 
     fetchWashrooms();
   }, []);
+
+  const fetchWaitTimes = async (id: number) => {
+    try {
+      const response = await axios.get(`http://172.20.10.3:8000/test.php/avgWaitTime?washroomId=${id}`);
+      if (Array.isArray(response.data)) {
+        const waitTimesData = response.data.reduce((acc: any, item: any) => {
+          const roundedWaitTime = Math.round(parseFloat(item.avgWaitTime));
+          acc[item.gender.toLowerCase()] = roundedWaitTime.toString();
+          return acc;
+        }, { female: 'N/A', male: 'N/A', other: 'N/A' });
+        setWaitTimes(waitTimesData);
+      } else {
+        console.error('Unexpected data format:', response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching wait times: ', error);
+    }
+  };
+
+  const toggleMoreInfo = (id: number) => {
+    if (expandedWashroomId === id) {
+      setExpandedWashroomId(null); // Close if already expanded
+      setWaitTimes(null); // Clear wait times when closing
+    } else {
+      setExpandedWashroomId(id);
+      fetchWaitTimes(id); // Fetch and display new wait times
+    }
+  };
 
   const getMarkerImage = (
     category: string,
@@ -49,45 +78,57 @@ const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage, goToRevie
     const currentHour = new Date().getHours();
 
     if (mapType) { // Score map
-      if(score != null) {
-        if (category === "Comfort Station") {
-            if (score >= 4) return require('./comfortGreen.png');
-            else if (score > 2.5) return require('./comfortYellow.png');
-            else return require('./comfortRed.png');
-          }
-         else {
-            if (score >= 4) return require('./portaGreen.png');
-            else if (score > 2.5) return require('./portaYellow.png');
-            else return require('./portaRed.png');
-          }
-        }
-      else {
-        if (category === "Comfort Station") {
-          return require('./comfortGray.png');
+      if (score !== null) {
+        if (category === 'Comfort Station') {
+          if (score >= 4) return require('./comfortGreen.png');
+          if (score > 2.5) return require('./comfortYellow.png');
+          return require('./comfortRed.png');
         } else {
-          return require('./portaGray.png');
+          if (score >= 4) return require('./portaGreen.png');
+          if (score > 2.5) return require('./portaYellow.png');
+          return require('./portaRed.png');
         }
       }
+      return category === 'Comfort Station' ? require('./comfortGray.png') : require('./portaGray.png');
     } else { // Open/Close map
-      if (category === "Comfort Station") {
-        if (openHour != null && closeHour != null && currentHour > openHour && currentHour < closeHour) {
-          return require('./comfortBlue.png');
-        } else {
-          return require('./comfortGray.png');
-        }
-      } else {
-        if (openHour != null && closeHour != null && currentHour > openHour && currentHour < closeHour) {
-          return require('./portaGray.png');
-        } else {
-          return require('./portaBlue.png');
-        }
-      }
+      const isOpen = openHour !== null && closeHour !== null && currentHour > openHour && currentHour < closeHour;
+      return category === 'Comfort Station' ? (isOpen ? require('./comfortBlue.png') : require('./comfortGray.png')) :
+        (isOpen ? require('./portaBlue.png') : require('./portaGray.png'));
     }
   };
 
-  const toggleMapType = () => {
-    setMapType(prevType => !prevType);
+  const renderCallout = (washroom: Washroom) => {
+    const isExpanded = expandedWashroomId === washroom.washroomId;
+    return (
+      <View style={styles.calloutContainer}>
+        <Text style={styles.calloutText}>{washroom.washroomName}</Text>
+        {washroom.openHour && washroom.closeHour ? (
+          <Text>Hours: {washroom.openHour} - {washroom.closeHour}</Text>
+        ) : null}
+        {washroom.score ? (
+          <Text>Overall Score: {washroom.score}</Text>
+        ) : null}
+        <TouchableOpacity style={styles.button} onPress={() => goToFormPage(washroom.washroomId)}>
+          <Text style={styles.buttonText}>Tap In / Rate Washroom</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => goToReviewsPage(washroom.washroomId)}>
+          <Text style={styles.buttonText}>See / Write Review</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => toggleMoreInfo(washroom.washroomId)}>
+          <Text style={styles.buttonText}>{isExpanded ? 'Hide More Info' : 'More Info'}</Text>
+        </TouchableOpacity>
+        {isExpanded && waitTimes && (
+          <View style={styles.moreInfoContainer}>
+            <Text style={styles.moreInfoText}>Female Wait Time: {waitTimes.female} sec</Text>
+            <Text style={styles.moreInfoText}>Male Wait Time: {waitTimes.male} sec</Text>
+            <Text style={styles.moreInfoText}>Other Wait Time: {waitTimes.other} sec</Text>
+          </View>
+        )}
+      </View>
+    );
   };
+
+  const toggleMapType = () => setMapType(prevType => !prevType);
 
   return (
     <View style={styles.container}>
@@ -116,33 +157,12 @@ const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage, goToRevie
                 coordinate={{ latitude, longitude }}
                 title={washroom.washroomName}
               >
-                {/* Custom marker with image */}
                 <Image
                   source={getMarkerImage(washroom.category, washroom.openHour, washroom.closeHour, washroom.score)}
-                  style={{ width: 45, height: 45, resizeMode: 'contain' }}
+                  style={styles.markerImage}
                 />
-
-                {/* Callout with information */}
                 <Callout tooltip>
-                  <View style={styles.calloutContainer}>
-                    <Text style={styles.calloutText}>{washroom.washroomName}</Text>
-
-                    {washroom.openHour && washroom.closeHour ? (
-                      <Text>Hours: {washroom.openHour} - {washroom.closeHour}</Text>
-                    ) : null}
-
-                    {washroom.score ? (
-                      <Text>Overall Score: {washroom.score}</Text>
-                    ) : null}
-
-                    <TouchableOpacity style={styles.button} onPress={() => goToFormPage(washroom.washroomId)}>
-                      <Text style={styles.buttonText}>Tap In / Rate Washroom</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.button} onPress={() => goToReviewsPage(washroom.washroomId)}>
-                      <Text style={styles.buttonText}>See / Write Review</Text>
-                    </TouchableOpacity>
-                  </View>
+                  {renderCallout(washroom)}
                 </Callout>
               </Marker>
             );
@@ -157,7 +177,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage, goToRevie
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
@@ -168,27 +187,42 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   calloutContainer: {
-    minWidth: 150,
+    minWidth: 250, // Increased minimum width
     maxWidth: 300,
-    padding: 10,
+    padding: 15, // Added padding for more space
     backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',
+    elevation: 4, // Adding shadow for elevation on Android
+    shadowColor: '#000', // Adding shadow for elevation on iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   calloutText: {
     fontSize: 16,
     marginBottom: 5,
   },
   button: {
-    backgroundColor: 'lightblue',
+    backgroundColor: '#87CEFA', // Light sky blue
     marginTop: 5,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 7, // Increased padding
+    paddingHorizontal: 12, // Increased padding
     borderRadius: 5,
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
+  },
+  moreInfoContainer: {
+    marginTop: 10,
+    padding: 10, // Added padding for better spacing
+    borderTopWidth: 1,
+    borderTopColor: '#ddd', // Light border for separation
+  },
+  moreInfoText: {
+    fontSize: 14,
+    color: '#333', // Darker text color for better readability
   },
   toggleButton: {
     position: 'absolute',
@@ -203,6 +237,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
+  markerImage: {
+    width: 45,
+    height: 45,
+    resizeMode: 'contain',
+  },
 });
+
 
 export default MapScreen;
