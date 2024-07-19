@@ -80,6 +80,49 @@ if ($_SERVER['REQUEST_URI'] === '/test.php/washroomData') {
         http_response_code(400);
         echo "Failed to decode JSON.";
     }
+} else if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['REQUEST_URI'] === '/test.php/reviews') {
+    // Read and decode JSON body sent by Axios
+    $data = json_decode(file_get_contents("php://input"), true);
+    // Assuming $data now holds the JSON-decoded body
+    if ($data) {
+        // Extract data from the received JSON
+        $text = $data['text'];
+        $washroomId = $data['washroomId'];
+
+        // Print the received data
+        echo "Received review data:\n";
+        echo "Text: $text\n";
+        echo "WashroomId: $washroomId\n";
+
+        $date = date('Y-m-d H:i:s'); // Convert string to date format.
+
+        // Retrieve the next formId
+        $getMaxReviewId = "SELECT COALESCE(MAX(reviewId) + 1, 1) AS nextReviewId FROM Reviews";
+        $result = $conn->query($getMaxReviewId);
+
+        if ($result) {
+            $row = $result->fetch_assoc();
+            $intReviewId = $row['nextReviewId'];
+
+            // Prepare SQL statement for inserting into Forms table
+            $insertReviews = "INSERT INTO Reviews (washroomId, reviewId, text, reviewTimestamp) VALUES ($washroomId, $intReviewId, $waitTime, '{$text}', '{$date}')";
+            if ($conn->query($insertForms) === TRUE) {
+                echo "New record inserted successfully";
+            } else {
+                echo "Error: " . $insertForms . "<br>" . $conn->error;
+            }
+        } else {
+            echo "Error retrieving next reviewId: " . $conn->error;
+        }
+
+        // Optionally, you can send a response back to your React Native app
+        $response = array('message' => 'Review data received successfully');
+        echo json_encode($response);
+    } else {
+        // Handle case where JSON decoding failed
+        http_response_code(400);
+        echo "Failed to decode JSON.";
+    }
 } else {
     // Invalid endpoint
     http_response_code(404);
