@@ -9,7 +9,7 @@ interface ReviewProps {
 }
 
 interface ReviewItemInterface {
-  reviewText: string;
+  text: string;
 }
 
 const Review: React.FC<ReviewProps> = ({ washroomId, goBackToMap }) => {
@@ -37,10 +37,8 @@ const Review: React.FC<ReviewProps> = ({ washroomId, goBackToMap }) => {
           washroomId: washroomId
         });
         console.log('Review data sent successfully:', response.data);
-        
-        // Update the reviews state with the new review
-        setReviews(prevReviews => [...prevReviews, { reviewText: newReview }]);
         setNewReview('');
+        setReviews(reviews => [{ text: newReview }, ...reviews]);
       } catch (error) {
         console.error('Error sending review data:', error);
       }
@@ -60,9 +58,12 @@ const Review: React.FC<ReviewProps> = ({ washroomId, goBackToMap }) => {
       </TouchableOpacity>
       <ScrollView style={styles.reviewsContainer}>
         {reviews.map((review, index) => (
-          <ReviewItem key={index} review={review.reviewText} />
+          <ReviewItem key={index} review={review.text} />
         ))}
       </ScrollView>
+      <TouchableOpacity style={styles.backButton} onPress={goBackToMap}>
+        <Text style={styles.backButtonText}>Back</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -94,6 +95,20 @@ const styles = StyleSheet.create({
   },
   reviewsContainer: {
     marginTop: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    backgroundColor: '#ffb6c1', // Light pastel color
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 
