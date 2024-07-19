@@ -231,12 +231,12 @@ washroomId	longitude	latitude	washroomName	category	onCall	street	openHour	close
 2882	-80.4333079305674	43.4559155619138	Grand River Recreation Complex Restroom	Community Centre Washroom	0	HERITAGE DR	6.50	22.00	NULL
 2883	-80.4532419836657	43.4008242862078	Budd Park Soccer Field 1	Portable	0	NULL	8.00	14.00	NULL
 2884	-80.4539473263634	43.4019909119626	Budd Park	Portable	NULL	HOMER WATSON BLVD	7.00	17.00	NULL
-avgWaitTime
-51.853750
-avgWaitTime
-85.250000
-avgWaitTime
-160.000000
+gender	avgWaitTime
+Other	160.000000
+Female	51.853750
+Male	85.250000
+gender	avgWaitTime
+Female	60.500000
 reviewTimestamp	text
 2024-08-05 17:15:06	hand dryer not working
 2024-08-05 16:10:05	very modern design

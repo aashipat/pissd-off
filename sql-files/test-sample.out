@@ -11,8 +11,10 @@ washroomId	longitude	latitude	washroomName	category	onCall	street	openHour	close
 3	-80.495904861268	43.4702911256744	Breithaupt Park Comfort Station	Comfort Station	0	MAPLEWOOD PL	12.00	16.50	NULL
 4	-80.4991974734409	43.445158231938	Victoria Park Comfort Station Pavilion	Comfort Station	NULL	SCHNEIDER AVE	NULL	NULL	NULL
 5	-80.4939821409826	43.4475217273846	Victoria Park Comfort Station Jubilee	Comfort Station	1	NULL	9.00	20.00	NULL
-avgWaitTime
-45.165000
+gender	avgWaitTime
+Male	200.000000
+Female	45.165000
+Other	160.000000
 reviewTimestamp	text
 2024-05-10 20:36:31	this washroom is really ugly
 2024-05-10 20:35:31	ugly place
