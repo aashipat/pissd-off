@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_URI'] === '/test.php/washroomData') {
     if (isset($_GET['washroomId'])) {
         $washroomId = $_GET['washroomId'];
         // Fetch data from MySQL database
-        $sql = "SELECT r.text FROM Reviews r WHERE r.washroomId = $washroomId";
+        $sql = "SELECT r.text FROM Reviews r WHERE r.washroomId = $washroomId ORDER BY r.reviewTimestamp DESC";
         
         $result = $conn->query($sql);
 
