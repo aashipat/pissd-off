@@ -831,10 +831,4 @@ INSERT INTO Reviews (washroomId, reviewId, reviewTimestamp, text) VALUES
 (1019, 416, '2024-07-15 16:31:00.000', 'nice hand dryers'),
 (1019, 417, '2024-07-15 16:32:00.000', 'adequate facilities'),
 (1019, 418, '2024-07-15 16:33:00.000', 'unpleasant smell'),
-(1019, 419, '2024-07-15 16:34:00.000', 'friendly atmosphere'),
-
-(1020, 420, '2024-07-15 16:35:00.000', 'broken faucet'),
-(1020, 421, '2024-07-15 16:36:00.000', 'clean and fresh'),
-(1020, 422, '2024-07-15 16:37:00.000', 'poor upkeep'),
-(1020, 423, '2024-07-15 16:38:00.000', 'nice decor'),
-(1020, 424, '2024-07-15 16:39:00.000', 'friendly staff');
+(1019, 419, '2024-07-15 16:34:00.000', 'friendly atmosphere');
