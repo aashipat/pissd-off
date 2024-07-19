@@ -1,38 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import ReviewItem from './ReviewItem'; // Import the ReviewItem component
 import axios from 'axios';
+import ReviewItem from './ReviewItem'; // Ensure this import is correct
 
 interface ReviewProps {
   washroomId: number;
   goBackToMap: () => void;
 }
 
-interface ReviewItem {
+interface ReviewItemInterface {
   reviewText: string;
 }
 
-const Review: React.FC<ReviewProps> = ({washroomId, goBackToMap}) => {
+const Review: React.FC<ReviewProps> = ({ washroomId, goBackToMap }) => {
   const [newReview, setNewReview] = useState('');
-  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [reviews, setReviews] = useState<ReviewItemInterface[]>([]);
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get(`http://172.20.10.3:8000/test.php/reviews?washroomID=${washroomId}`);
+        const response = await axios.get(`http://172.20.10.3:8000/test.php/reviews?washroomId=${washroomId}`);
         console.log('API response data:', response.data);
-        setReviews(response.data)
+        setReviews(response.data);
       } catch (error) {
-        console.error('Error fetching washrooms data: ', error);
+        console.error('Error fetching Review data:', error);
       }
     };
-  }, []);
+    fetchReviews();
+  }, [washroomId]);
 
-
-  const handleAddReview = () => {
+  const sendNewReview = async () => {
     if (newReview.trim()) {
-      const newReviewObject = {review: newReview };
-      setNewReview('');
+      try {
+        const response = await axios.post('http://172.20.10.3:8000/test.php/reviews', {
+          text: newReview,
+          washroomId: washroomId
+        });
+        console.log('Review data sent successfully:', response.data);
+        
+        // Update the reviews state with the new review
+        setReviews(prevReviews => [...prevReviews, { reviewText: newReview }]);
+        setNewReview('');
+      } catch (error) {
+        console.error('Error sending review data:', error);
+      }
     }
   };
 
@@ -44,12 +55,12 @@ const Review: React.FC<ReviewProps> = ({washroomId, goBackToMap}) => {
         value={newReview}
         onChangeText={setNewReview}
       />
-      <TouchableOpacity style={styles.submitButton} onPress={handleAddReview}>
+      <TouchableOpacity style={styles.submitButton} onPress={sendNewReview}>
         <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
       <ScrollView style={styles.reviewsContainer}>
-        {reviews.map((review) => (
-          <ReviewItem review={review.reviewText} />
+        {reviews.map((review, index) => (
+          <ReviewItem key={index} review={review.reviewText} />
         ))}
       </ScrollView>
     </View>
