@@ -7,28 +7,14 @@ WITH avgWaitTimes AS (
 	FROM Forms f
     GROUP BY f.washroomId, f.gender
 )
-SELECT avgWaitTime FROM avgWaitTimes WHERE washroomId = 1 AND gender = 'Female';
+SELECT gender, avgWaitTime FROM avgWaitTimes WHERE washroomId = 1;
 
 WITH avgWaitTimes AS (
 	SELECT f.washroomId, f.gender, AVG(f.waitTime) AS avgWaitTime
 	FROM Forms f
     GROUP BY f.washroomId, f.gender
 )
-SELECT avgWaitTime FROM avgWaitTimes WHERE washroomId = 1 AND gender = 'Male';
-
-WITH avgWaitTimes AS (
-	SELECT f.washroomId, f.gender, AVG(f.waitTime) AS avgWaitTime
-	FROM Forms f
-    GROUP BY f.washroomId, f.gender
-)
-SELECT avgWaitTime FROM avgWaitTimes WHERE washroomId = 1 AND gender = 'Other';
-
-WITH avgWaitTimes AS (
-	SELECT f.washroomId, f.gender, AVG(f.waitTime) AS avgWaitTime
-	FROM Forms f
-    GROUP BY f.washroomId, f.gender
-)
-SELECT avgWaitTime FROM avgWaitTimes WHERE washroomId = 2249 AND gender = 'Male';
+SELECT gender, avgWaitTime FROM avgWaitTimes WHERE washroomId = 2249;
 
 SELECT r.reviewTimestamp, r.text
     FROM Reviews r
