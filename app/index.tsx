@@ -21,6 +21,11 @@ const App = () => {
     setCurrentScreen('Map');
   };
 
+  const goToReviewsPage = (id: number) => {
+    setWashroomId(id);
+    setCurrentScreen('Review');
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,11 +47,11 @@ const App = () => {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'Map':
-        return <MapScreen location={location} goToFormPage={goToFormPage}/>;
+        return <MapScreen location={location} goToFormPage={goToFormPage} goToReviewsPage={goToReviewsPage}/>;
       case 'Form':
         return <Form washroomId={washroomId} submitForm={goToMapsPage}/>;
       case 'Review':
-        return <Review />;
+        return <Review washroomId={washroomId} goBackToMap={goToMapsPage}/>;
       default:
         return null;
     }

@@ -26,9 +26,10 @@ interface WashroomWaitTimes {
 interface MapScreenProps {
   location: Location.LocationObject | null;
   goToFormPage: (id: number) => void;
+  goToReviewsPage: (id: number) => void;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage, goToReviewsPage }) => {
   const [washrooms, setWashrooms] = useState<Washroom[]>([]); //array of washrooms
 
   useEffect(() => {
@@ -59,8 +60,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage }) => {
 
     // Function to determine marker image based on coordinates
     const getMarkerImage = (category: string): any => {
-      // Example condition: Use different images based on latitude or longitude ranges
-      // Replace with your logic based on specific criteria
       if (category == "Comfort Station") {
         return require('./comfort.png'); // Example image 1
       } else {
@@ -118,6 +117,10 @@ const MapScreen: React.FC<MapScreenProps> = ({ location, goToFormPage }) => {
 
                     <TouchableOpacity style={styles.button} onPress={() => goToFormPage(washroom.washroomId)}>
                       <Text style={styles.buttonText}>Tap In / Rate Washroom</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.button} onPress={() => goToReviewsPage(washroom.washroomId)}>
+                      <Text style={styles.buttonText}>See / Write Review</Text>
                     </TouchableOpacity>
                   </View>
                 </Callout>

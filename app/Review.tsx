@@ -1,21 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import ReviewItem from './ReviewItem'; // Import the ReviewItem component
+import axios from 'axios';
 
-const dummyReviews = [
-  { id: 1, review: 'Clean and well-maintained!' },
-  { id: 2, review: 'Could be better. The soap dispenser was empty.' },
-  { id: 3, review: 'Nice and clean, but the floor was a bit wet.' },
-];
+interface ReviewProps {
+  washroomId: number;
+  goBackToMap: () => void;
+}
 
-const Review: React.FC = () => {
+interface ReviewItem {
+  reviewText: string;
+}
+
+const Review: React.FC<ReviewProps> = ({washroomId, goBackToMap}) => {
   const [newReview, setNewReview] = useState('');
-  const [reviews, setReviews] = useState(dummyReviews);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get(`http://172.20.10.3:8000/test.php/reviews?washroomID=${washroomId}`);
+        console.log('API response data:', response.data);
+        setReviews(response.data)
+      } catch (error) {
+        console.error('Error fetching washrooms data: ', error);
+      }
+    };
+  }, []);
+
 
   const handleAddReview = () => {
     if (newReview.trim()) {
-      const newReviewObject = { id: reviews.length + 1, review: newReview };
-      setReviews([...reviews, newReviewObject]);
+      const newReviewObject = {review: newReview };
       setNewReview('');
     }
   };
@@ -33,7 +49,7 @@ const Review: React.FC = () => {
       </TouchableOpacity>
       <ScrollView style={styles.reviewsContainer}>
         {reviews.map((review) => (
-          <ReviewItem key={review.id} review={review.review} />
+          <ReviewItem review={review.reviewText} />
         ))}
       </ScrollView>
     </View>
