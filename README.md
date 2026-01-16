@@ -1,6 +1,16 @@
-# CS-348-Course-Project
+# Relief Route 📍
 
-This project is a React Native application designed to help users find and rate public bathrooms. It includes a map interface, a form for submitting ratings, and a review section.
+Relief Route is like Google Maps for bathrooms. Built with React Native, the app helps users locate, review, and rate public bathrooms in real time. It features an interactive map with two viewing modes, user-submitted ratings, average wait times, and more to improve accessibility and decision-making while on the go!
+
+## Demo
+
+### Features - Locations and Ratings
+
+<img width="750" height="400" alt="Screenshot 2026-01-16 at 9 51 23 AM" src="https://github.com/user-attachments/assets/ce5ba16c-7af2-4db2-9d60-15a6f99fc903" />
+
+### Features - Average Wait Times, Reviews and more
+
+<img width="750" height="400" alt="Screenshot 2026-01-16 at 9 53 28 AM" src="https://github.com/user-attachments/assets/2ad4a0f0-927a-40d0-9a6e-954e717522de" />
 
 ## Prerequisites
 
